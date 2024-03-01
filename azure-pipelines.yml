@@ -10,15 +10,9 @@ pool:
   vmImage: ubuntu-latest
 strategy:
   matrix:
-    Python35:
-      PYTHON_VERSION: '3.5'
-    Python36:
-      PYTHON_VERSION: '3.6'
-    Python37:
-      PYTHON_VERSION: '3.7'
     Python312:
       PYTHON_VERSION: '3.12'
-  maxParallel: 4
+  maxParallel: 2
 
 steps:
 - task: UsePythonVersion@0
@@ -50,8 +44,19 @@ steps:
 
 - script: |
     pushd '$(projectRoot)'
-    python manage.py runserver 0.0.0.0:8000
-  displayName: 'Run server'
+    python manage.py test --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner --no-input
+  displayName: 'Run tests'
+
+- task: Docker@2
+  inputs:
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
+    arguments: '-t DjangoApp .'
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: 'docker run -d -p 8000:8000 DjangoApp'
+
 
 - task: PublishTestResults@2
   inputs:
