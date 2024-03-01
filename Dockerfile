@@ -1,4 +1,5 @@
 # Use the official Python image as the base image
+ARG IMAGE_NAME=DjangoApp
 FROM python:3.12
 
 # Set environment variables
