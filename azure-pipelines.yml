@@ -47,6 +47,17 @@ steps:
     python manage.py test --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner --no-input
   displayName: 'Run tests'
 
+- task: Docker@2
+  inputs:
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
+    arguments: '-t DjangoApp .'
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: 'docker run -d -p 8000:8000 DjangoApp'
+
+
 - task: PublishTestResults@2
   inputs:
     testResultsFiles: "**/TEST-*.xml"
