@@ -44,8 +44,8 @@ steps:
 
 - script: |
     pushd '$(projectRoot)'
-    python manage.py runserver 0.0.0.0:8000
-  displayName: 'Run server'
+    python manage.py test --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner --no-input
+  displayName: 'Run tests'
 
 - task: PublishTestResults@2
   inputs:
