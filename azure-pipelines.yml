@@ -43,23 +43,19 @@ steps:
   displayName: 'Install prerequisites'
 
 - script: |
-    pushd '$(projectRoot)'
-    python manage.py test --testrunner xmlrunner.extra.djangotestrunner.XMLTestRunner --no-input
-  displayName: 'Run tests'
+    pip install bandit 
+  displayName: 'Install prerequisites'
 
-- task: Docker@2
-  inputs:
-    command: 'build'
-    Dockerfile: '**/Dockerfile'
+- script: |
+    bandit -r . -ll -s B605 -f html -o ./TEST-Bandit.html
+  displayName: 'Bandit test'
 
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: 'docker run -d -p 8000:8000 DjangoApp'
+
+
 
 
 - task: PublishTestResults@2
   inputs:
-    testResultsFiles: "**/TEST-*.xml"
+    testResultsFiles: "**/TEST-*.html"
     testRunTitle: 'Python $(PYTHON_VERSION)'
   condition: succeededOrFailed()
