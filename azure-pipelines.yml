@@ -36,7 +36,10 @@ steps:
       print('Found Django project in', project_location)
       print('##vso[task.setvariable variable=projectRoot]{}'.format(project_location))
 
-
+- script: |
+    pip install safety
+    safety --key 421822b5-19e820a4-fed50161-10f475c6 --stage cicd scan --apply-fixes
+  displayName: 'Dependency Check'
 
 - script: |
     python -m pip install --upgrade pip setuptools wheel
@@ -44,18 +47,13 @@ steps:
     pip install unittest-xml-reporting
   displayName: 'Install prerequisites'
 
-- script: |
-    pip install safety
-    safety --key 421822b5-19e820a4-fed50161-10f475c6 --stage cicd scan
-  displayName: 'Dependency Check'
+
 
 - script: |
     pip install bandit 
     bandit -r . -ll -s B605 -f xml -o ./TEST-Bandit.xml
-    bandit -r . -ll -f html -o '$(Build.ArtifactStagingDirectory)'/TEST-Bandit.html
+    bandit -r . -ll -f html -s B605 -o '$(Build.ArtifactStagingDirectory)'/TEST-Bandit.html
   displayName: 'Bandit test'
-
-
 
 
 - task: PublishBuildArtifacts@1
