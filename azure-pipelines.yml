@@ -49,10 +49,10 @@ steps:
 - script: |
     bandit -r . -ll -s B605 -f xml -o ./TEST-Bandit.xml
     bandit -r . -ll -f html -o '$(Build.ArtifactStagingDirectory)'/TEST-Bandit.html
-
   displayName: 'Bandit test'
+
 - task: dependency-check-build-task@6
-  displayName: 'Export project path'
+  displayName: 'Depency Check'
   inputs:
     projectName: 'DefensyApp'
     scanPath: '**/*.py'
