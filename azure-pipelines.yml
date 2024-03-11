@@ -48,16 +48,16 @@ steps:
 
 - script: |
     bandit -r . -ll -s B605 -f xml -o ./TEST-Bandit.xml
-  displayName: 'Bandit test'
+    bandit -r . -ll -s B605 -f html -o '$(Build.ArtifactStagingDirectory)'/TEST-Bandit.html
 
+  displayName: 'Bandit test'
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: "**/TEST-*.xml"
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
     publishLocation: 'Container'
-
-
+  
 - task: PublishTestResults@2
   inputs:
     testResultsFiles: "**/TEST-*.xml"
