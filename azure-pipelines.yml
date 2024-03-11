@@ -46,7 +46,7 @@ steps:
 
 - script: |
     pip install safety
-    safety --key '421822b5-19e820a4-fed50161-10f475c6' scan --debug	
+    safety --key 421822b5-19e820a4-fed50161-10f475c6 --stage cicd scan
   displayName: 'Dependency Check'
 
 - script: |
