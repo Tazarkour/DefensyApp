@@ -46,7 +46,7 @@ steps:
 
 - script: |
     pip install safety
-    safety check --format json --output safety_report.json
+    safety scan --output html --save-html output.html
   displayName: 'Dependency Check'
 
 - script: |
