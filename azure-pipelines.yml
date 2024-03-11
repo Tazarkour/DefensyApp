@@ -36,16 +36,7 @@ steps:
       print('Found Django project in', project_location)
       print('##vso[task.setvariable variable=projectRoot]{}'.format(project_location))
 
-- task: dependency-check-build-task@6
-  displayName: 'Depency Check'
-  inputs:
-    projectName: 'DefensyApp'
-    scanPath: '**/*.py'
-    format: 'HTML'
-    failOnCVSS: '10'
-    reportsDirectory: '$(Build.ArtifactStagingDirectory)'
-    reportFilename: 'DepencyCheck.html'
-    enableVerbose: true
+
 
 - script: |
     python -m pip install --upgrade pip setuptools wheel
@@ -54,10 +45,12 @@ steps:
   displayName: 'Install prerequisites'
 
 - script: |
-    pip install bandit 
-  displayName: 'Install prerequisites'
+    pip install safety
+    safety check --format json --output safety_report.json
+  displayName: 'Dependency Check'
 
 - script: |
+    pip install bandit 
     bandit -r . -ll -s B605 -f xml -o ./TEST-Bandit.xml
     bandit -r . -ll -f html -o '$(Build.ArtifactStagingDirectory)'/TEST-Bandit.html
   displayName: 'Bandit test'
