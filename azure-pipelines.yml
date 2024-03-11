@@ -53,7 +53,7 @@ steps:
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    PathtoPublish: "**/TEST-*.xml"
     ArtifactName: 'drop'
     publishLocation: 'Container'
 
