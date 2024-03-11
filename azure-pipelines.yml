@@ -47,7 +47,7 @@ steps:
   displayName: 'Install prerequisites'
 
 - script: |
-    bandit -r . -ll -s B605 -f html -o ./TEST-Bandit.html
+    bandit -r . -ll -s B605 -f xml -o ./TEST-Bandit.xml
   displayName: 'Bandit test'
 
 
@@ -56,6 +56,6 @@ steps:
 
 - task: PublishTestResults@2
   inputs:
-    testResultsFiles: "**/TEST-*.html"
+    testResultsFiles: "**/TEST-*.xml"
     testRunTitle: 'Python $(PYTHON_VERSION)'
   condition: succeededOrFailed()
