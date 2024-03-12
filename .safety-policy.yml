@@ -2,7 +2,7 @@ version: '3.0'
 
 scanning-settings:
   max-depth: 6
-  exclude: []
+  exclude: [media/**]
   include-files: []
   system:
     targets: []

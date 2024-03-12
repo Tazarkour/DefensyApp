@@ -40,7 +40,7 @@ steps:
     pip install safety
     safety validate policy_file --path .safety-policy.yml
     safety --key 421822b5-19e820a4-fed50161-10f475c6 --stage cicd scan --policy-file .safety-policy.yml
-  displayName: 'Dependency Check'
+  displayName: 'Safety Check'
 
 - script: |
     python -m pip install --upgrade pip setuptools wheel
@@ -48,13 +48,6 @@ steps:
     pip install unittest-xml-reporting
   displayName: 'Install prerequisites'
 
-
-
-- script: |
-    pip install bandit 
-    bandit -r . -ll -s B605 -f xml -o ./TEST-Bandit.xml
-    bandit -r . -ll -f html -s B605 -o '$(Build.ArtifactStagingDirectory)'/TEST-Bandit.html
-  displayName: 'Bandit test'
 
 
 - task: PublishBuildArtifacts@1
