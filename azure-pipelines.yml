@@ -38,7 +38,8 @@ steps:
 
 - script: |
     pip install safety
-    safety --key 421822b5-19e820a4-fed50161-10f475c6 --stage cicd scan --apply-fixes
+    safety validate policy_file --path .safety-policy.yml
+    safety --key 421822b5-19e820a4-fed50161-10f475c6 --stage cicd scan --policy-file .safety-policy.yml
   displayName: 'Dependency Check'
 
 - script: |
