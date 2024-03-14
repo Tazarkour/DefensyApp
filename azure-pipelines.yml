@@ -39,8 +39,19 @@ steps:
 - script: |
     pip install safety
     safety validate policy_file --path .safety-policy.yml
+<<<<<<< HEAD
     safety --key 421822b5-19e820a4-fed50161-10f475c6 --stage cicd scan --policy-file .safety-policy.yml
   displayName: 'Dependency Check'
+=======
+    safety --key $(SafetyApiKey) --stage cicd scan --policy-file .safety-policy.yml
+  displayName: 'Safety Dependency Check'
+
+- script: |
+    pip install bandit 
+    bandit -r . -ll -s B605 -f xml -o ./TEST-Bandit.xml
+    bandit -r . -ll -f html -s B605 -o '$(Build.ArtifactStagingDirectory)'/TEST-Bandit.html
+  displayName: 'Bandit test'
+>>>>>>> 3d354af27a49c9e43b29c0d1f988617ab2477720
 
 - script: |
     python -m pip install --upgrade pip setuptools wheel
