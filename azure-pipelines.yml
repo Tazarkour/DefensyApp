@@ -40,7 +40,7 @@ steps:
   inputs:
     sshEndpoint: 'ssh test'
     runOptions: 'commands'
-    commands: 'sudo docker run -p 8080:8080 defensylab_app;'
+    commands: 'sudo docker run -p 8080:8080 defensylab_app -d ;'
     readyTimeout: '20000'
 
 - script: |
