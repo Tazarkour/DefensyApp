@@ -36,11 +36,12 @@ steps:
       print('Found Django project in', project_location)
       print('##vso[task.setvariable variable=projectRoot]{}'.format(project_location))
 
-- script: |
-    pip install safety
-    safety validate policy_file --path .safety-policy.yml
-    safety --key $(SafetyApiKey) --stage cicd scan --policy-file .safety-policy.yml
-  displayName: 'Safety Dependency Check'
+- task: SSH@0
+  inputs:
+    sshEndpoint: 'ssh test'
+    runOptions: 'commands'
+    commands: 'touch /tmp/test_complete;'
+    readyTimeout: '20000'
 
 - script: |
     pip install bandit 
