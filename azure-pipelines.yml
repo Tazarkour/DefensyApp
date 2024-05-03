@@ -36,12 +36,6 @@ steps:
       print('Found Django project in', project_location)
       print('##vso[task.setvariable variable=projectRoot]{}'.format(project_location))
 
-- task: SSH@0
-  inputs:
-    sshEndpoint: 'ssh test'
-    runOptions: 'commands'
-    commands: 'sudo docker run -d -p 8080:8080 defensylab_app  ;'
-    readyTimeout: '20000'
 
 - script: |
     pip install bandit 
@@ -70,9 +64,14 @@ steps:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
     publishLocation: 'Container'
-  
-- task: PublishTestResults@2
+- task: PublishBuildArtifacts@1
   inputs:
-    testResultsFiles: "**/TEST-*.xml"
-    testRunTitle: 'Python $(PYTHON_VERSION)'
-  condition: succeededOrFailed()
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'Release'
+    publishLocation: 'Container'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Pipeline.Workspace)'
+    ArtifactName: 'Release'
+    publishLocation: 'Container'
