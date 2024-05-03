@@ -82,9 +82,20 @@ stages:
         deploy:
           steps:
           - script: docker run -d -p 8080:8080 defensylab_app; 
-  - job:
+  - job: OWASP_ZAP_Scan
     steps : 
     - task: owaspzap@1
       inputs:
+        scantype: 'targetedScan'
+        url: 'http://40.68.114.64'
         port: '8080'
-      
+  - job: Kill_Container
+    steps:
+    - task: SSH@0
+      inputs:
+        sshEndpoint: 'Connection_SSH_Deployement_Manager'
+        runOptions: 'commands'
+        commands: 'docker stop $(docker ps -q --filter ancestor=defensylab_app)'
+        readyTimeout: '20000'
+      condition: always()
+  
