@@ -2,7 +2,13 @@
 # Test a Django project on multiple versions of Python.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
-
+pool:
+  vmImage: ubuntu-latest
+  strategy:
+    matrix:
+      Python312:
+        PYTHON_VERSION: '3.12'
+    maxParallel: 2
 trigger:
 - master
 stages:
