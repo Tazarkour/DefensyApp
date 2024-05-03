@@ -92,7 +92,7 @@ stages:
           chmod -R 777 ./
           docker run --rm \
             -v $(pwd):/zap/wrk/:rw \
-            -t owasp/zap2docker-stable \
+            -t softwaresecurityproject/zap-stable \
             zap-full-scan.py \
             -t https://dzone.com \
             -g gen.conf \
