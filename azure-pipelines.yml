@@ -90,6 +90,7 @@ stages:
         url: 'http://40.68.114.64'
         port: '8080'
   - job: Kill_Container
+    dependsOn: OWASP_ZAP_Scan
     steps:
     - task: SSH@0
       inputs:
