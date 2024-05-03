@@ -94,7 +94,7 @@ stages:
             -v $(pwd):/zap/wrk/:rw \
             -t softwaresecurityproject/zap-stable \
             zap-full-scan.py \
-            -t https://dzone.com \
+            -t http://40.68.114.64:8080 \
             -g gen.conf \
             -x OWASP-ZAP-Report.xml \
             -r scan-report.html
