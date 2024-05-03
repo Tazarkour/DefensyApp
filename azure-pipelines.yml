@@ -74,12 +74,17 @@ stages:
       vmImage: 'Ubuntu-latest'
     # creates an environment if it doesn't exist
     environment: 
-      name: 'Deployement'
+      name: 'Pre-Production Deployement'
       resourceName: Dlab-Intern8
       resourceType: virtualMachine
     strategy:
       runOnce:
         deploy:
           steps:
-          - script: touch /tmp/test_complete   
+          - script: docker run -d -p 8080:8080 defensylab_app; 
+  - job:
+    steps : 
+    - task: owaspzap@1
+      inputs:
+        port: '8080'
       
