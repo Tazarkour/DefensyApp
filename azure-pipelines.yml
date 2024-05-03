@@ -100,14 +100,14 @@ stages:
         targetType: 'inline'
         script: |
           docker build -t defensyapp:latest . ;
-          docker run -d -p 8080:8080 defensyapp:latest;
+          docker run  -d --network host -p 8080:8080 defensyapp:latest;
     - task: Bash@3
       displayName: Run_OWASP_ZAP
       inputs:
         targetType: 'inline'
         script: |
           chmod -R 777 ./
-          docker run --rm \
+          docker run --network host --rm \
             -v $(pwd):/zap/wrk/:rw \
             -t softwaresecurityproject/zap-stable \
             zap-full-scan.py \
