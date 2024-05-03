@@ -9,7 +9,7 @@ pool:
     vmImage: ubuntu-latest
 
 stages:
-- stage: build
+- stage: Build_Project
 
   jobs:
 
@@ -42,24 +42,31 @@ stages:
           pip install -r requirements.txt
           pip install unittest-xml-reporting
         displayName: 'Install prerequisites'
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Pipeline.Workspace)'
+          ArtifactName: 'Release'
+          publishLocation: 'Container'
+        
 - stage: test
   pool:
     vmImage: ubuntu-latest
   jobs:
     - job: run_test
       steps:
-      
+      - task: WhiteSource@21
+        inputs:
+          cwd: '$(System.DefaultWorkingDirectory)'
+          projectName: 'DefensyApp'
+    - job: Bandit_Check
+      steps:
       - script: |
           pip install bandit 
           bandit -r . -ll -s B605 -f xml -o ./TEST-Bandit.xml
           bandit -r . -ll -f html -s B605 -o '$(Build.ArtifactStagingDirectory)'/TEST-Bandit.html
         displayName: 'Bandit test'
-      - task: PublishBuildArtifacts@1
-        inputs:
-          PathtoPublish: '$(Pipeline.Workspace)'
-          ArtifactName: 'Release'
-          publishLocation: 'Container'
-- stage: deploy
+      
+- stage: Pre_Production
   jobs:
   - deployment: DeployWeb
     displayName: deploy Web App
