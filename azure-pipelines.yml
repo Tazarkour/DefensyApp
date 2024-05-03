@@ -59,3 +59,19 @@ stages:
           PathtoPublish: '$(Pipeline.Workspace)'
           ArtifactName: 'Release'
           publishLocation: 'Container'
+- stage: deploy
+  jobs:
+  - deployment: DeployWeb
+    displayName: deploy Web App
+    pool:
+      vmImage: 'Ubuntu-latest'
+    # creates an environment if it doesn't exist
+    environment: 
+      name: 'Deployement'
+      resourceName: Dlab-Intern8
+      resourceType: virtualMachine
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: touch /tmp/test_complete   
