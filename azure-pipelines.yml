@@ -48,11 +48,11 @@ stages:
           ArtifactName: 'Release'
           publishLocation: 'Container'
         
-- stage: test
+- stage: Test
   pool:
     vmImage: ubuntu-latest
   jobs:
-    - job: run_test
+    - job: Mend_Bolt_Dependency_Check
       steps:
       - task: WhiteSource@21
         inputs:
@@ -82,3 +82,4 @@ stages:
         deploy:
           steps:
           - script: touch /tmp/test_complete   
+      
