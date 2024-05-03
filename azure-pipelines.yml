@@ -99,8 +99,8 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          docker build -t DefensyApp:latest . ;
-          docker run -d -p 8080:8080 DefensyApp;
+          docker build -t defensyapp:latest . ;
+          docker run -d -p 8080:8080 defensyapp:latest;
     - task: Bash@3
       displayName: Run_OWASP_ZAP
       inputs:
