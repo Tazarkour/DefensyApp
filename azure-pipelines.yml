@@ -98,7 +98,7 @@ stages:
       runOnce:
         deploy:
           steps:
-          - script: docker run -d -p 8080:8080 tazarkour/defensylabwebapp:test; 
+          - script: docker pull tazarkour/defensylabwebapp:test; docker run -d -p 8080:8080 tazarkour/defensylabwebapp:test; 
   - job: OWASP_ZAP_Scan_Scan
     
     dependsOn: DeployWeb
