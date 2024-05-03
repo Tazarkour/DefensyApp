@@ -93,7 +93,7 @@ stages:
           rm -rf .git;
           rm .pre-commit-config.yaml;
           rm .safety-policy.yml;
-          rm .azure-pipelines.yml;
+          rm azure-pipelines.yml;
     - task: Bash@3
       displayName: build_and_run_app
       inputs:
