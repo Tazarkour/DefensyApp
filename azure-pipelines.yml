@@ -61,7 +61,7 @@ stages:
         displayName: 'Bandit test'
       - task: PublishBuildArtifacts@1
         inputs:
-            PathtoPublish: '$(Pipeline.Workspace)/s/TEST-Bandit.html'
+            PathtoPublish: '$(Build.ArtifactStagingDirectory)/TEST-Bandit.html'
             ArtifactName: 'Test_results'
             publishLocation: 'Container'
       
