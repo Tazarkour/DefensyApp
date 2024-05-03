@@ -5,17 +5,17 @@
 
 trigger:
 - master
+pool:
+    vmImage: ubuntu-latest
+
 stages:
 - stage: build
-  pool:
-    vmImage: ubuntu-latest
-    strategy:
-      matrix:
-        Python312:
-          PYTHON_VERSION: '3.12'
-      maxParallel: 2
+
   jobs:
+
     - job: run_build
+      pool:
+        vmImage: ubuntu-latest
       steps:
       - task: UsePythonVersion@0
         inputs:
@@ -45,11 +45,6 @@ stages:
 - stage: test
   pool:
     vmImage: ubuntu-latest
-    strategy:
-      matrix:
-        Python312:
-          PYTHON_VERSION: '3.12'
-      maxParallel: 2
   jobs:
     - job: run_test
       steps:
