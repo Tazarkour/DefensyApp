@@ -100,16 +100,6 @@ stages:
             -r scan-report.html
           
           true
-    - task: PowerShell@2
-      inputs:
-        targetType: 'inline'
-        script: |
-          $XslPath = "$($Env:SYSTEM_DEFAULTWORKINGDIRECTORY)/_Quality/SecurityTesting/OWASPToNUnit3.xslt"
-          $XmlInputPath = "$($Env:SYSTEM_DEFAULTWORKINGDIRECTORY)/OWASP-ZAP-Report.xml"
-          $XmlOutputPath = "$($Env:SYSTEM_DEFAULTWORKINGDIRECTORY)/Converted-OWASP-ZAP-Report.xml"
-          $XslTransform = New-Object System.Xml.Xsl.XslCompiledTransform
-          $XslTransform.Load($XslPath)
-          $XslTransform.Transform($XmlInputPath, $XmlOutputPath)
     - task: PublishBuildArtifacts@1
       inputs:
           PathtoPublish: '$(Pipeline.Workspace)'
