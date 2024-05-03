@@ -146,7 +146,7 @@ stages:
       inputs:
         sshEndpoint: 'Connection_SSH_Deployement_Manager'
         runOptions: 'commands'
-        commands: 'docker stop $(docker ps -q --filter ancestor=defensylab_app)'
+        commands: 'docker stop $(docker ps -a -q --filter ancestor=tazarkour/defensylabwebapp:test)'
         readyTimeout: '20000'
       condition: always()
 
