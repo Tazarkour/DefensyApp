@@ -42,12 +42,6 @@ stages:
           pip install -r requirements.txt
           pip install unittest-xml-reporting
         displayName: 'Install prerequisites'
-      - task: PublishBuildArtifacts@1
-        inputs:
-          PathtoPublish: '$(Pipeline.Workspace)'
-          ArtifactName: 'Release'
-          publishLocation: 'Container'
-        
 - stage: Test
   pool:
     vmImage: ubuntu-latest
@@ -65,28 +59,18 @@ stages:
           bandit -r . -ll -s B605 -f xml -o ./TEST-Bandit.xml
           bandit -r . -ll -f html -s B605 -o '$(Build.ArtifactStagingDirectory)'/TEST-Bandit.html
         displayName: 'Bandit test'
+      - task: PublishBuildArtifacts@1
+        inputs:
+            PathtoPublish: '$(Pipeline.Workspace)/s/TEST-Bandit.html'
+            ArtifactName: 'Test_results'
+            publishLocation: 'Container'
       
 - stage: Pre_Production
   jobs:
-  #- deployment: DeployWeb
-   # displayName: deploy Web App
-    #pool:
-      #vmImage: 'Ubuntu-latest'
-    # creates an environment if it doesn't exist
-    #environment: 
-     # name: 'Pre-Production Deployement'
-      #resourceName: Dlab-Intern8
-      #resourceType: virtualMachine
-    #strategy:
-     # runOnce:
-      #  deploy:
-       #   steps:
-       #   - script: docker run -d -p 8080:8080 defensylab_app; 
-  - job: OWASP_ZAP_Scan_Scan
-    #dependsOn: DeployWeb
-    steps : 
+  - job : publish_image_test
+    steps:
     - task: Bash@3
-      displayName: remove_useless_files
+      displayName: delete_useless_files
       inputs:
         targetType: 'inline'
         script: |
@@ -99,8 +83,42 @@ stages:
       inputs:
         targetType: 'inline'
         script: |
-          docker build -t defensyapp:latest . ;
-          docker run  -d --network host -p 8080:8080 defensyapp:latest;
+          docker login  -u tazarkour --password $(Docker_token)
+          docker build -t tazarkour/defensylabwebapp:test . ;
+          docker push tazarkour/defensylabwebapp:test;
+  - deployment: DeployWeb
+    displayName: deploy Web App
+    pool:
+      vmImage: 'Ubuntu-latest'
+    environment: 
+      name: 'Pre-Production Deployement'
+      resourceName: Dlab-Intern8
+      resourceType: virtualMachine
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: docker run -d -p 8080:8080 tazarkour/defensylabwebapp:test; 
+  - job: OWASP_ZAP_Scan_Scan
+    
+    dependsOn: DeployWeb
+    steps : 
+ #   - task: Bash@3
+     #  displayName: remove_useless_files
+      # inputs:
+       #  targetType: 'inline'
+        # script: |
+         #  rm -rf .git;
+          # rm .pre-commit-config.yaml;
+          # rm .safety-policy.yml;
+         #  rm azure-pipelines.yml;
+   #  - task: Bash@3
+     #  displayName: build_and_run_app
+     #  inputs:
+      #   targetType: 'inline'
+       #  script: |
+        #   docker build -t defensyapp:latest . ;
+       #   v docker run  -d --network host -p 8080:8080 defensyapp:latest;
     - task: Bash@3
       displayName: Run_OWASP_ZAP
       inputs:
@@ -111,7 +129,7 @@ stages:
             -v $(pwd):/zap/wrk/:rw \
             -t softwaresecurityproject/zap-stable \
             zap-full-scan.py \
-            -t http://$(ip -f inet -o addr show docker0 | awk '{print $4}' | cut -d '/' -f 1):8080 \
+            -t http://40.68.114.64:8080/ \
             -g gen.conf \
             -x OWASP-ZAP-Report.xml \
             -r scan-report.html
@@ -122,6 +140,15 @@ stages:
           PathtoPublish: '$(Pipeline.Workspace)'
           ArtifactName: 'Release'
           publishLocation: 'Container'
+      condition: always()
+    - task: SSH@0
+      displayName: Kill_Containers
+      inputs:
+        sshEndpoint: 'Connection_SSH_Deployement_Manager'
+        runOptions: 'commands'
+        commands: 'docker stop $(docker ps -q --filter ancestor=defensylab_app)'
+        readyTimeout: '20000'
+      condition: always()
 
 - stage: Production
   jobs:
