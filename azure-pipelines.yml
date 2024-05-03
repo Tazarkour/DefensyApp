@@ -111,7 +111,7 @@ stages:
             -v $(pwd):/zap/wrk/:rw \
             -t softwaresecurityproject/zap-stable \
             zap-full-scan.py \
-            -t http://127.0.0.1:8080 \
+            -t http://$(ip -f inet -o addr show docker0 | awk '{print $4}' | cut -d '/' -f 1):8080 \
             -g gen.conf \
             -x OWASP-ZAP-Report.xml \
             -r scan-report.html
@@ -125,6 +125,25 @@ stages:
 
 - stage: Production
   jobs:
+  - job: Publish_Docker_Image 
+    steps:
+      - task: Bash@3
+        displayName: delete_useless_files
+        inputs:
+          targetType: 'inline'
+          script: |
+            rm -rf .git;
+            rm .pre-commit-config.yaml;
+            rm .safety-policy.yml;
+            rm azure-pipelines.yml;
+      - task: Bash@3
+        displayName: build_and_run_app
+        inputs:
+          targetType: 'inline'
+          script: |
+            docker login  -u tazarkour --password $(Docker_token)
+            docker build -t tazarkour/defensylabwebapp:latest . ;
+            docker push tazarkour/defensylabwebapp:latest;
   - deployment: DeployWeb
     displayName: deploy Web App
     pool:
@@ -138,7 +157,7 @@ stages:
       runOnce:
         deploy:
           steps:
-          - script: docker run -d -p 8080:8080 defensylab_app; 
+          - script: docker pull tazarkour/defensylabwebapp:latest; docker run -d -p 8080:8080 tazarkour/defensylabwebapp:latest; 
   #  - task: SSH@0
     #  displayName: Kill_Containers
     #  inputs:
