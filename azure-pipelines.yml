@@ -5,73 +5,48 @@
 
 trigger:
 - master
+stages:
+- stage: build
+  jobs:
+    - job: run_build
+      steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(PYTHON_VERSION)'
+          architecture: 'x64'
 
-pool:
-  vmImage: ubuntu-latest
-strategy:
-  matrix:
-    Python312:
-      PYTHON_VERSION: '3.12'
-  maxParallel: 2
-
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(PYTHON_VERSION)'
-    architecture: 'x64'
-
-- task: PythonScript@0
-  displayName: 'Export project path'
-  inputs:
-    scriptSource: 'inline'
-    script: |
-      """Search all subdirectories for `manage.py`."""
-      from glob import iglob
-      from os import path
-      # Python >= 3.5
-      manage_py = next(iglob(path.join('**', 'manage.py'), recursive=True), None)
-      if not manage_py:
-          raise SystemExit('Could not find a Django project')
-      project_location = path.dirname(path.abspath(manage_py))
-      print('Found Django project in', project_location)
-      print('##vso[task.setvariable variable=projectRoot]{}'.format(project_location))
-
-
-- script: |
-    pip install bandit 
-    bandit -r . -ll -s B605 -f xml -o ./TEST-Bandit.xml
-    bandit -r . -ll -f html -s B605 -o '$(Build.ArtifactStagingDirectory)'/TEST-Bandit.html
-  displayName: 'Bandit test'
-
-
-- script: |
-    python -m pip install --upgrade pip setuptools wheel
-    pip install -r requirements.txt
-    pip install unittest-xml-reporting
-  displayName: 'Install prerequisites'
-
-
-
-- script: |
-    pip install bandit 
-    bandit -r . -ll -s B605 -f xml -o ./TEST-Bandit.xml
-    bandit -r . -ll -f html -s B605 -o '$(Build.ArtifactStagingDirectory)'/TEST-Bandit.html
-  displayName: 'Bandit test'
-
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'Release'
-    publishLocation: 'Container'
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Pipeline.Workspace)'
-    ArtifactName: 'Release'
-    publishLocation: 'Container'
+      - task: PythonScript@0
+        displayName: 'Export project path'
+        inputs:
+          scriptSource: 'inline'
+          script: |
+            """Search all subdirectories for `manage.py`."""
+            from glob import iglob
+            from os import path
+            # Python >= 3.5
+            manage_py = next(iglob(path.join('**', 'manage.py'), recursive=True), None)
+            if not manage_py:
+                raise SystemExit('Could not find a Django project')
+            project_location = path.dirname(path.abspath(manage_py))
+            print('Found Django project in', project_location)
+            print('##vso[task.setvariable variable=projectRoot]{}'.format(project_location))
+      - script: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+          pip install unittest-xml-reporting
+        displayName: 'Install prerequisites'
+- stage: test
+  jobs:
+    - job: run_test
+      steps:
+      
+      - script: |
+          pip install bandit 
+          bandit -r . -ll -s B605 -f xml -o ./TEST-Bandit.xml
+          bandit -r . -ll -f html -s B605 -o '$(Build.ArtifactStagingDirectory)'/TEST-Bandit.html
+        displayName: 'Bandit test'
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Pipeline.Workspace)'
+          ArtifactName: 'Release'
+          publishLocation: 'Container'
