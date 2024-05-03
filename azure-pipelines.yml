@@ -85,12 +85,38 @@ stages:
   - job: OWASP_ZAP_Scan_Scan
     dependsOn: DeployWeb
     steps : 
-    - task: owaspzap@1
+    - task: Bash@3
       inputs:
-        scantype: 'targetedScan'
-        url: 'http://40.68.114.64'
-        port: '8080'
+        targetType: 'inline'
+        script: |
+          chmod -R 777 ./
+          docker run --rm \
+            -v $(pwd):/zap/wrk/:rw \
+            -t owasp/zap2docker-stable \
+            zap-full-scan.py \
+            -t https://dzone.com \
+            -g gen.conf \
+            -x OWASP-ZAP-Report.xml \
+            -r scan-report.html
+          
+          true
+    - task: PowerShell@2
+      inputs:
+        targetType: 'inline'
+        script: |
+          $XslPath = "$($Env:SYSTEM_DEFAULTWORKINGDIRECTORY)/_Quality/SecurityTesting/OWASPToNUnit3.xslt"
+          $XmlInputPath = "$($Env:SYSTEM_DEFAULTWORKINGDIRECTORY)/OWASP-ZAP-Report.xml"
+          $XmlOutputPath = "$($Env:SYSTEM_DEFAULTWORKINGDIRECTORY)/Converted-OWASP-ZAP-Report.xml"
+          $XslTransform = New-Object System.Xml.Xsl.XslCompiledTransform
+          $XslTransform.Load($XslPath)
+          $XslTransform.Transform($XmlInputPath, $XmlOutputPath)
+    - task: PublishBuildArtifacts@1
+      inputs:
+          PathtoPublish: '$(Pipeline.Workspace)'
+          ArtifactName: 'Release'
+          publishLocation: 'Container'
     - task: SSH@0
+      displayName: Kill_Containers
       inputs:
         sshEndpoint: 'Connection_SSH_Deployement_Manager'
         runOptions: 'commands'
