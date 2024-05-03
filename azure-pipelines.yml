@@ -68,24 +68,41 @@ stages:
       
 - stage: Pre_Production
   jobs:
-  - deployment: DeployWeb
-    displayName: deploy Web App
-    pool:
-      vmImage: 'Ubuntu-latest'
+  #- deployment: DeployWeb
+   # displayName: deploy Web App
+    #pool:
+      #vmImage: 'Ubuntu-latest'
     # creates an environment if it doesn't exist
-    environment: 
-      name: 'Pre-Production Deployement'
-      resourceName: Dlab-Intern8
-      resourceType: virtualMachine
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - script: docker run -d -p 8080:8080 defensylab_app; 
+    #environment: 
+     # name: 'Pre-Production Deployement'
+      #resourceName: Dlab-Intern8
+      #resourceType: virtualMachine
+    #strategy:
+     # runOnce:
+      #  deploy:
+       #   steps:
+       #   - script: docker run -d -p 8080:8080 defensylab_app; 
   - job: OWASP_ZAP_Scan_Scan
-    dependsOn: DeployWeb
+    #dependsOn: DeployWeb
     steps : 
     - task: Bash@3
+      displayName: remove_useless_files
+      inputs:
+        targetType: 'inline'
+        script: |
+          rm -rf .git;
+          rm .pre-commit-config.yaml;
+          rm .safety-policy.yml;
+          rm .azure-pipelines.yml;
+    - task: Bash@3
+      displayName: build_and_run_app
+      inputs:
+        targetType: 'inline'
+        script: |
+          docker build -t DefensyApp:latest . ;
+          docker run -d -p 8080:8080 DefensyApp;
+    - task: Bash@3
+      displayName: Run_OWASP_ZAP
       inputs:
         targetType: 'inline'
         script: |
@@ -94,24 +111,46 @@ stages:
             -v $(pwd):/zap/wrk/:rw \
             -t softwaresecurityproject/zap-stable \
             zap-full-scan.py \
-            -t http://40.68.114.64:8080 \
+            -t http://127.0.0.1:8080 \
             -g gen.conf \
             -x OWASP-ZAP-Report.xml \
             -r scan-report.html
           
           true
+    - task: Bash@3
+      displayName: Kill_Containers
+      inputs:
+        targetType: 'inline'
+        script: 'docker stop $(docker ps -q --filter ancestor=DefensyApp);'
     - task: PublishBuildArtifacts@1
       inputs:
           PathtoPublish: '$(Pipeline.Workspace)'
           ArtifactName: 'Release'
           publishLocation: 'Container'
-    - task: SSH@0
-      displayName: Kill_Containers
-      inputs:
-        sshEndpoint: 'Connection_SSH_Deployement_Manager'
-        runOptions: 'commands'
-        commands: 'docker stop $(docker ps -q --filter ancestor=defensylab_app)'
-        readyTimeout: '20000'
-      condition: always()
+
+- stage: Production
+  jobs:
+  - deployment: DeployWeb
+    displayName: deploy Web App
+    pool:
+      vmImage: 'Ubuntu-latest'
+    # creates an environment if it doesn't exist
+    environment: 
+      name: 'Deployement'
+      resourceName: Dlab-Intern8
+      resourceType: virtualMachine
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: docker run -d -p 8080:8080 defensylab_app; 
+  #  - task: SSH@0
+    #  displayName: Kill_Containers
+    #  inputs:
+      #  sshEndpoint: 'Connection_SSH_Deployement_Manager'
+      #  runOptions: 'commands'
+       # commands: 'docker stop $(docker ps -q --filter ancestor=defensylab_app)'
+       # readyTimeout: '20000'
+      #condition: always()
       
   
