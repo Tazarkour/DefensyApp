@@ -117,11 +117,6 @@ stages:
             -r scan-report.html
           
           true
-    - task: Bash@3
-      displayName: Kill_Containers
-      inputs:
-        targetType: 'inline'
-        script: 'docker stop $(docker ps -q --filter ancestor=DefensyApp);'
     - task: PublishBuildArtifacts@1
       inputs:
           PathtoPublish: '$(Pipeline.Workspace)'
